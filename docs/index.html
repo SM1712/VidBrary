@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0891b2">
+    <meta name="description" content="Vidbrary - Descarga, organiza y reproduce tus videos de YouTube. Gratis, sin anuncios, sin limites.">
+    <meta property="og:title" content="Vidbrary - Video Downloader & Library">
+    <meta property="og:description" content="Descarga, organiza y reproduce tus videos de YouTube. Gratis y sin anuncios.">
+    <meta property="og:type" content="website">
+    <title>Vidbrary - Video Downloader & Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0a0e17;--bg-1:#111827;--bg-2:#1a2236;
+            --tx:#f1f5f9;--tx-2:#94a3b8;
+            --accent:#0891b2;--accent-glow:rgba(8,145,178,.25);
+            --gradient:linear-gradient(135deg,#0891b2,#06b6d4,#22d3ee);
+        }
+        body{
+            font-family:'Inter',system-ui,sans-serif;
+            background:var(--bg);color:var(--tx);
+            line-height:1.6;overflow-x:hidden;
+        }
+        a{color:var(--accent);text-decoration:none}
+
+        /* ─── Hero ─── */
+        .hero{
+            min-height:100vh;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;text-align:center;
+            padding:40px 20px;position:relative;
+        }
+        .hero::before{
+            content:'';position:absolute;top:-50%;left:-50%;
+            width:200%;height:200%;
+            background:radial-gradient(ellipse at 50% 30%,var(--accent-glow) 0%,transparent 60%);
+            pointer-events:none;z-index:0;
+        }
+        .hero>*{position:relative;z-index:1}
+
+        .hero-logo{
+            width:100px;height:100px;margin-bottom:28px;
+            filter:drop-shadow(0 0 30px var(--accent-glow));
+            animation:float 3s ease-in-out infinite;
+        }
+        @keyframes float{
+            0%,100%{transform:translateY(0)}
+            50%{transform:translateY(-10px)}
+        }
+        .hero h1{
+            font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;
+            letter-spacing:-2px;margin-bottom:12px;
+            background:var(--gradient);-webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;background-clip:text;
+        }
+        .hero .tagline{
+            font-size:clamp(1rem,2.5vw,1.35rem);color:var(--tx-2);
+            max-width:600px;margin:0 auto 36px;font-weight:400;
+        }
+
+        /* ─── CTA Buttons ─── */
+        .cta-group{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:48px}
+        .btn{
+            display:inline-flex;align-items:center;gap:10px;
+            padding:14px 32px;border-radius:14px;font-size:16px;
+            font-weight:600;font-family:inherit;cursor:pointer;
+            border:none;transition:.2s;
+        }
+        .btn i{font-size:20px}
+        .btn-primary{
+            background:var(--gradient);color:#fff;
+            box-shadow:0 4px 24px var(--accent-glow);
+        }
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px var(--accent-glow)}
+        .btn-outline{
+            background:transparent;color:var(--tx);
+            border:1.5px solid rgba(255,255,255,.15);
+        }
+        .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+
+        /* ─── Features ─── */
+        .features{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+            gap:20px;max-width:1100px;width:100%;margin:0 auto;padding:0 20px;
+        }
+        .feature{
+            background:var(--bg-1);border:1px solid rgba(255,255,255,.06);
+            border-radius:16px;padding:28px;transition:.2s;
+        }
+        .feature:hover{border-color:var(--accent);transform:translateY(-4px)}
+        .feature-icon{
+            width:48px;height:48px;border-radius:12px;
+            background:var(--accent-glow);
+            display:flex;align-items:center;justify-content:center;
+            margin-bottom:16px;
+        }
+        .feature-icon i{font-size:24px;color:var(--accent)}
+        .feature h3{font-size:17px;font-weight:700;margin-bottom:8px}
+        .feature p{font-size:14px;color:var(--tx-2);line-height:1.55}
+
+        /* ─── Screenshots ─── */
+        .screenshots{
+            max-width:1100px;margin:80px auto 0;padding:0 20px;text-align:center;
+        }
+        .screenshots h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;margin-bottom:12px}
+        .screenshots .sub{color:var(--tx-2);margin-bottom:36px;font-size:15px}
+        .screen-grid{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+            gap:16px;
+        }
+        .screen-card{
+            background:var(--bg-2);border:1px solid rgba(255,255,255,.06);
+            border-radius:14px;overflow:hidden;
+            aspect-ratio:16/10;
+            display:flex;align-items:center;justify-content:center;
+            color:var(--tx-2);font-size:14px;
+        }
+
+        /* ─── How To ─── */
+        .howto{
+            max-width:800px;margin:80px auto 0;padding:0 20px;text-align:center;
+        }
+        .howto h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;margin-bottom:36px}
+        .steps{display:flex;flex-direction:column;gap:20px;text-align:left}
+        .step{
+            display:flex;gap:18px;align-items:flex-start;
+            background:var(--bg-1);border:1px solid rgba(255,255,255,.06);
+            border-radius:14px;padding:22px;
+        }
+        .step-num{
+            width:40px;height:40px;border-radius:10px;flex-shrink:0;
+            background:var(--accent-glow);color:var(--accent);
+            display:flex;align-items:center;justify-content:center;
+            font-weight:800;font-size:18px;
+        }
+        .step h4{font-size:15px;font-weight:700;margin-bottom:4px}
+        .step p{font-size:13.5px;color:var(--tx-2)}
+
+        /* ─── Download Section ─── */
+        .download-section{
+            max-width:700px;margin:80px auto 0;padding:0 20px;text-align:center;
+        }
+        .download-section h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;margin-bottom:12px}
+        .download-section .sub{color:var(--tx-2);margin-bottom:28px;font-size:15px}
+        .download-box{
+            background:var(--bg-1);border:1px solid rgba(255,255,255,.08);
+            border-radius:18px;padding:36px;
+        }
+        .download-box .version{
+            display:inline-block;background:var(--accent-glow);color:var(--accent);
+            padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;
+            margin-bottom:16px;
+        }
+        .download-box .reqs{color:var(--tx-2);font-size:13px;margin-top:16px}
+        .download-box .reqs i{color:var(--accent);margin-right:4px}
+
+        /* ─── Footer ─── */
+        footer{
+            text-align:center;padding:60px 20px 30px;
+            color:var(--tx-2);font-size:13px;
+        }
+        footer a{color:var(--accent)}
+        footer .heart{color:#ef4444}
+
+        /* ─── Responsive ─── */
+        @media(max-width:600px){
+            .cta-group{flex-direction:column;align-items:center}
+            .btn{width:100%;max-width:320px;justify-content:center}
+            .step{flex-direction:column;gap:12px}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <img class="hero-logo" src="icon.svg" alt="Vidbrary">
+        <h1>Vidbrary</h1>
+        <p class="tagline">Descarga, organiza y reproduce tus videos de YouTube. Gratis, sin anuncios, sin limites.</p>
+
+        <div class="cta-group">
+            <a href="#download" class="btn btn-primary">
+                <i class="ri-download-2-line"></i>
+                Descargar para Windows
+            </a>
+            <a href="https://github.com/TU_USUARIO/vidbrary" class="btn btn-outline" target="_blank">
+                <i class="ri-github-fill"></i>
+                Ver en GitHub
+            </a>
+        </div>
+
+        <!-- Features -->
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon"><i class="ri-download-cloud-2-line"></i></div>
+                <h3>Descarga cualquier video</h3>
+                <p>Videos, playlists completas, MP3 de audio. Elige calidad, formato y subtitulos.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><i class="ri-folder-video-line"></i></div>
+                <h3>Biblioteca organizada</h3>
+                <p>Carpetas, organizacion por canal, busqueda avanzada. Tu coleccion siempre en orden.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><i class="ri-play-circle-line"></i></div>
+                <h3>Reproductor integrado</h3>
+                <p>Reproduce con autoplay, cola inteligente, progreso guardado y control de visto/no visto.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><i class="ri-smartphone-line"></i></div>
+                <h3>Acceso desde el celular</h3>
+                <p>Conectate desde cualquier dispositivo en tu red. Descarga directo a tu telefono.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><i class="ri-moon-line"></i></div>
+                <h3>Modo oscuro y claro</h3>
+                <p>Interfaz moderna con tema oscuro y claro. Responsive en cualquier pantalla.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon"><i class="ri-wifi-off-line"></i></div>
+                <h3>100% offline y privado</h3>
+                <p>Todo corre en tu PC. Sin cuentas, sin rastreo, sin servidores externos.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How To -->
+    <section class="howto">
+        <h2>Como usarlo</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div>
+                    <h4>Descarga el .zip</h4>
+                    <p>Haz clic en el boton de descarga. Se baja un archivo .zip desde Google Drive.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div>
+                    <h4>Descomprime y ejecuta</h4>
+                    <p>Extrae la carpeta y ejecuta <strong>Vidbrary.exe</strong>. No necesita instalacion.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div>
+                    <h4>Pega un enlace de YouTube</h4>
+                    <p>Se abre tu navegador automaticamente. Pega cualquier enlace y descarga al instante.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div>
+                    <h4>Accede desde tu celular</h4>
+                    <p>Conéctate a la misma red WiFi y abre la IP que aparece en el icono de bandeja. El video se descarga directo a tu telefono.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download -->
+    <section class="download-section" id="download">
+        <h2>Descargar Vidbrary</h2>
+        <p class="sub">Portable, sin instalacion. Solo descomprime y ejecuta.</p>
+
+        <div class="download-box">
+            <span class="version">v1.0.0 - Windows</span>
+            <br><br>
+            <!--
+                INSTRUCCIONES PARA EL LINK DE GOOGLE DRIVE:
+                1. Sube el .zip de dist/Vidbrary/ a Google Drive
+                2. Haz clic derecho > Compartir > Cualquiera con el enlace
+                3. Copia el enlace, que sera algo como:
+                   https://drive.google.com/file/d/XXXXXXXXX/view?usp=sharing
+                4. Reemplaza el ID en el href de abajo:
+                   https://drive.google.com/uc?export=download&id=XXXXXXXXX
+            -->
+            <a href="https://drive.google.com/uc?export=download&id=1bgCpyFHke574uNPB7m6At7KJW1Smtq44" class="btn btn-primary" id="downloadLink">
+                <i class="ri-download-2-line"></i>
+                Descargar .zip (~80 MB)
+            </a>
+            <div class="reqs">
+                <p><i class="ri-checkbox-circle-line"></i> Windows 10/11 (64-bit)</p>
+                <p><i class="ri-checkbox-circle-line"></i> No requiere instalacion</p>
+                <p><i class="ri-checkbox-circle-line"></i> FFmpeg incluido</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Hecho con <span class="heart">&#10084;</span> por un amante del codigo libre</p>
+        <p style="margin-top:8px">
+            <a href="https://github.com/TU_USUARIO/vidbrary" target="_blank"><i class="ri-github-fill"></i> GitHub</a>
+        </p>
+    </footer>
+
+</body>
+</html>

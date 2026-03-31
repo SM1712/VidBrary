@@ -17,6 +17,10 @@ let playerQueue = [];
 let libraryCache = [];
 let progressSaveTimer = null;
 
+// ─── Mobile Detection ─────────────────────────────────
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints > 1 && window.innerWidth < 1024);
+
 const LANGS = {
     en:'English',es:'Español',fr:'Français',de:'Deutsch',it:'Italiano',
     pt:'Português',ru:'Русский',ja:'日本語',ko:'한국어',zh:'中文',
@@ -183,6 +187,10 @@ function showPreview(info) {
     renderSubLangs(info.subtitles || {});
     updateFolderSelects();
     show('videoPreview');
+
+    // Show mobile hint if on mobile
+    const hint = document.getElementById('mobileHint');
+    if (hint) hint.style.display = isMobile ? 'flex' : 'none';
 }
 
 function updateQuality() {
@@ -249,7 +257,11 @@ async function startDownload() {
             download_subs: document.getElementById('subtitleToggle').checked,
             subtitle_langs: selectedSubLangs,
         });
-        toast(`Descarga iniciada: ${videoInfo.title}`, 'info');
+        if (isMobile) {
+            toast(`Procesando en PC... Se descargará a tu teléfono automáticamente`, 'info');
+        } else {
+            toast(`Descarga iniciada: ${videoInfo.title}`, 'info');
+        }
         trackDl(data.download_id, videoInfo.title);
     } catch (e) {
         toast(`Error: ${e.message}`, 'err');
@@ -287,7 +299,12 @@ function trackDl(id, title) {
                 clearInterval(timer);
                 delete pollTimers[id];
                 if (d.status === 'completed') {
-                    toast(`Completado: ${title}`, 'ok');
+                    if (isMobile && d.video_id) {
+                        // Mobile: auto-download file to phone, then cleanup on PC
+                        mobileDownloadAndCleanup(d.video_id, title);
+                    } else {
+                        toast(`Completado: ${title}`, 'ok');
+                    }
                     if (currentPage === 'library') loadLibrary();
                     loadStats(); loadFolders();
                 } else {
@@ -322,6 +339,44 @@ async function pollActive() {
             if (!document.getElementById(`dl-${id}`)) trackDl(id, 'Descarga');
         }
     } catch (_) {}
+}
+
+// ─── Mobile Download & Cleanup ───────────────────────
+async function mobileDownloadAndCleanup(videoId, title) {
+    toast(`Descargando a tu dispositivo: ${title}`, 'info');
+    updateDlBadge(videoId, 'Enviando al móvil');
+
+    try {
+        // Trigger browser download via hidden <a> tag
+        const a = document.createElement('a');
+        a.href = `/api/library/${videoId}/download-file`;
+        a.download = '';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+
+        // Wait for download to start, then cleanup on PC
+        setTimeout(async () => {
+            try {
+                await api(`/api/library/${videoId}/cleanup`, {});
+                toast(`${title} — guardado en tu dispositivo. Copia del PC eliminada.`, 'ok');
+            } catch (e) {
+                toast(`Archivo enviado, pero no se pudo limpiar del PC: ${e.message}`, 'err');
+            }
+            a.remove();
+            if (currentPage === 'library') loadLibrary();
+        }, 3000);
+    } catch (e) {
+        toast(`Error al descargar al dispositivo: ${e.message}`, 'err');
+    }
+}
+
+function updateDlBadge(videoId, text) {
+    // Find any dl-item that has this videoId's completed status and update badge
+    document.querySelectorAll('.dl-badge-completed').forEach(badge => {
+        badge.textContent = text;
+        badge.className = 'dl-badge dl-badge-processing';
+    });
 }
 
 // ─── Library ──────────────────────────────────────────

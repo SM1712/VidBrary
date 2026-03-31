@@ -11,12 +11,22 @@ import uuid
 import re
 from pathlib import Path
 
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, Response
 
 import yt_dlp
 
-app = Flask(__name__)
-BASE_DIR = Path(__file__).parent
+# ─── Path resolution (works both dev and .exe) ──────────
+_data_dir = os.environ.get('VIDBRARY_DATA_DIR')
+_template_dir = os.environ.get('VIDBRARY_TEMPLATE_DIR')
+_static_dir = os.environ.get('VIDBRARY_STATIC_DIR')
+
+app = Flask(
+    __name__,
+    template_folder=_template_dir or os.path.join(os.path.dirname(__file__), 'templates'),
+    static_folder=_static_dir or os.path.join(os.path.dirname(__file__), 'static'),
+)
+
+BASE_DIR = Path(_data_dir) if _data_dir else Path(__file__).parent
 DOWNLOADS_DIR = BASE_DIR / "downloads"
 DB_PATH = BASE_DIR / "vidbrary.db"
 DOWNLOADS_DIR.mkdir(exist_ok=True)
@@ -399,7 +409,11 @@ def do_download(download_id, url, options):
         conn.commit()
         conn.close()
 
-        active_downloads[download_id] = {"status": "completed", "progress": 100, "speed": "", "eta": ""}
+        # Include video_id so mobile clients can trigger file download
+        active_downloads[download_id] = {
+            "status": "completed", "progress": 100, "speed": "", "eta": "",
+            "video_id": video_id,
+        }
 
     except Exception as e:
         active_downloads[download_id] = {"status": "error", "progress": 0, "speed": "", "eta": "", "error": str(e)}
@@ -464,6 +478,7 @@ def download_status(download_id):
         return jsonify({
             "status": row["status"], "progress": row["progress"],
             "speed": row["speed"] or "", "eta": row["eta"] or "", "error": row["error"] or "",
+            "video_id": row["video_id"] or "",
         })
     return jsonify({"error": "Not found"}), 404
 
@@ -565,6 +580,47 @@ def open_video(video_id):
     if not video or not video["file_path"] or not os.path.exists(video["file_path"]):
         return jsonify({"error": "File not found"}), 404
     return send_file(video["file_path"])
+
+
+@app.route("/api/library/<video_id>/download-file")
+def download_file(video_id):
+    """Serve video as attachment download (for mobile save-to-device)."""
+    conn = get_db()
+    video = conn.execute("SELECT * FROM videos WHERE id=?", (video_id,)).fetchone()
+    conn.close()
+    if not video or not video["file_path"] or not os.path.exists(video["file_path"]):
+        return jsonify({"error": "File not found"}), 404
+    filename = os.path.basename(video["file_path"])
+    return send_file(video["file_path"], as_attachment=True, download_name=filename)
+
+
+@app.route("/api/library/<video_id>/cleanup", methods=["POST"])
+def cleanup_file(video_id):
+    """Delete the video file from PC after mobile download. Keeps DB record."""
+    conn = get_db()
+    video = conn.execute("SELECT * FROM videos WHERE id=?", (video_id,)).fetchone()
+    if not video:
+        conn.close()
+        return jsonify({"error": "Not found"}), 404
+
+    file_path = video["file_path"]
+    deleted = False
+    if file_path and os.path.exists(file_path):
+        os.remove(file_path)
+        deleted = True
+        # Remove empty channel directory
+        parent_dir = Path(file_path).parent
+        if parent_dir != DOWNLOADS_DIR and parent_dir.exists():
+            try:
+                parent_dir.rmdir()
+            except OSError:
+                pass
+
+    # Mark as deleted in DB but keep record
+    conn.execute("UPDATE videos SET is_deleted=1 WHERE id=?", (video_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True, "deleted": deleted})
 
 
 @app.route("/api/library/<video_id>/progress", methods=["GET"])
