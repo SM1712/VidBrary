@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Output and runtime files
+vidbrary.db
+downloads/
+
+# Other environment and editor config
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.claude/
+.vscode/
+.idea/

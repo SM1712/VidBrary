@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0891b2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Vidbrary - The Ultimate Video Downloader & Library">
+    <title>Vidbrary</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" href="/static/img/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/static/img/icon.svg">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body data-theme="dark">
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="btn-icon" id="menuToggle" onclick="toggleSidebar()">
+            <i class="ri-menu-line"></i>
+        </button>
+        <div class="logo-sm">
+            <img src="/static/img/icon.svg" alt="Vidbrary" width="28" height="28">
+            <span>Vidbrary</span>
+        </div>
+        <button class="btn-icon" id="themeToggleMobile" onclick="toggleTheme()">
+            <i class="ri-moon-line"></i>
+        </button>
+    </header>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="/static/img/icon.svg" alt="V" width="32" height="32">
+                <span>Vidbrary</span>
+            </div>
+            <button class="btn-icon theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+                <i class="ri-moon-line" id="themeIcon"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="download" onclick="switchPage('download', event)">
+                <i class="ri-download-cloud-2-line"></i>
+                <span>Descargar</span>
+            </a>
+            <a href="#" class="nav-item" data-page="library" onclick="switchPage('library', event)">
+                <i class="ri-film-line"></i>
+                <span>Biblioteca</span>
+            </a>
+            <a href="#" class="nav-item" data-page="history" onclick="switchPage('history', event)">
+                <i class="ri-time-line"></i>
+                <span>Historial</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-section">
+            <div class="section-header">
+                <span>Colecciones</span>
+                <button class="btn-icon-sm" onclick="showCreateFolder()" title="Nueva carpeta">
+                    <i class="ri-add-line"></i>
+                </button>
+            </div>
+            <div id="folderTree" class="folder-tree"></div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="stats" id="sidebarStats"></div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+
+        <!-- ═══ DOWNLOAD PAGE ═══ -->
+        <section class="page active" id="page-download">
+            <div class="page-header">
+                <div class="page-title">
+                    <i class="ri-download-cloud-2-line"></i>
+                    <h1>Descargar</h1>
+                </div>
+            </div>
+
+            <div class="download-container">
+                <div class="url-input-container">
+                    <div class="url-input-wrapper">
+                        <i class="ri-link"></i>
+                        <input type="url" id="urlInput" placeholder="Pega aquí el enlace de YouTube..." autocomplete="off" inputmode="url">
+                        <button class="btn btn-primary btn-analyze" id="analyzeBtn" onclick="analyzeUrl()">
+                            <i class="ri-search-eye-line"></i>
+                            <span class="btn-label">Analizar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analyze-loading hidden" id="analyzeLoading">
+                    <div class="loader"><span></span><span></span><span></span></div>
+                    <span>Analizando enlace...</span>
+                </div>
+
+                <div class="error-box hidden" id="analyzeError">
+                    <i class="ri-error-warning-line"></i>
+                    <span id="analyzeErrorText"></span>
+                </div>
+
+                <!-- Video Preview -->
+                <div class="video-preview hidden" id="videoPreview">
+                    <div class="preview-card">
+                        <div class="preview-thumb">
+                            <img id="previewThumb" src="" alt="">
+                            <span class="badge-duration" id="previewDuration"></span>
+                            <span class="badge-playlist hidden" id="playlistBadge">
+                                <i class="ri-play-list-2-fill"></i>
+                                <span id="playlistCount"></span>
+                            </span>
+                        </div>
+                        <div class="preview-info">
+                            <h2 id="previewTitle"></h2>
+                            <p class="preview-channel"><i class="ri-user-line"></i> <span id="previewChannel"></span></p>
+                            <p class="preview-desc" id="previewDesc"></p>
+                        </div>
+                    </div>
+
+                    <!-- Playlist Entries -->
+                    <details class="playlist-details hidden" id="playlistEntries">
+                        <summary>
+                            <i class="ri-play-list-2-fill"></i>
+                            <span>Videos en la playlist</span>
+                            <i class="ri-arrow-down-s-line chevron"></i>
+                        </summary>
+                        <div class="entries-scroll" id="entriesList"></div>
+                    </details>
+
+                    <!-- Options Card -->
+                    <div class="options-card">
+                        <div class="options-row">
+                            <div class="option-group">
+                                <label><i class="ri-file-type-line"></i> Formato</label>
+                                <div class="chip-group" id="formatSelector">
+                                    <button class="chip active" data-format="mp4"><i class="ri-film-line"></i> MP4</button>
+                                    <button class="chip" data-format="mkv"><i class="ri-film-line"></i> MKV</button>
+                                    <button class="chip" data-format="webm"><i class="ri-film-line"></i> WebM</button>
+                                    <button class="chip" data-format="mp3"><i class="ri-music-2-line"></i> MP3</button>
+                                </div>
+                            </div>
+
+                            <div class="option-group" id="qualityGroup">
+                                <label><i class="ri-hd-line"></i> Calidad</label>
+                                <select id="qualitySelect" class="select-modern"></select>
+                            </div>
+                        </div>
+
+                        <div class="options-row">
+                            <div class="option-group" id="subtitleGroup">
+                                <label><i class="ri-closed-captioning-line"></i> Subtítulos</label>
+                                <div class="toggle-row">
+                                    <label class="toggle">
+                                        <input type="checkbox" id="subtitleToggle">
+                                        <span class="toggle-track"></span>
+                                    </label>
+                                    <span>Incluir subtítulos</span>
+                                </div>
+                                <div class="sub-langs hidden" id="subtitleLangs"></div>
+                            </div>
+
+                            <div class="option-group">
+                                <label><i class="ri-folder-3-line"></i> Destino</label>
+                                <select id="folderSelect" class="select-modern">
+                                    <option value="">Sin carpeta (raíz)</option>
+                                </select>
+                                <div class="toggle-row" style="margin-top:8px">
+                                    <label class="toggle">
+                                        <input type="checkbox" id="autoChannelToggle">
+                                        <span class="toggle-track"></span>
+                                    </label>
+                                    <span>Crear carpeta por canal</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-gradient btn-full" id="downloadBtn" onclick="startDownload()">
+                            <i class="ri-download-2-line"></i>
+                            <span>Descargar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Downloads -->
+                <div id="activeDownloads">
+                    <div class="section-label hidden" id="activeDownloadsTitle">
+                        <i class="ri-download-line"></i> Descargas Activas
+                    </div>
+                    <div id="downloadsList"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ LIBRARY PAGE ═══ -->
+        <section class="page" id="page-library">
+            <div class="page-header">
+                <div class="page-title">
+                    <i class="ri-film-line"></i>
+                    <h1>Biblioteca</h1>
+                </div>
+                <div class="header-actions">
+                    <div class="search-input">
+                        <i class="ri-search-2-line"></i>
+                        <input type="text" id="librarySearch" placeholder="Buscar..." oninput="searchLibrary()">
+                    </div>
+                    <select id="watchFilter" class="select-modern select-sm" onchange="loadLibrary()">
+                        <option value="">Todos</option>
+                        <option value="unwatched">No vistos</option>
+                        <option value="watched">Vistos</option>
+                    </select>
+                    <select id="librarySort" class="select-modern select-sm" onchange="loadLibrary()">
+                        <option value="downloaded_at-DESC">Recientes</option>
+                        <option value="downloaded_at-ASC">Antiguos</option>
+                        <option value="title-ASC">A → Z</option>
+                        <option value="title-DESC">Z → A</option>
+                        <option value="file_size-DESC">Mayor tamaño</option>
+                        <option value="channel-ASC">Canal</option>
+                    </select>
+                    <div class="view-btns">
+                        <button class="btn-icon-sm active" data-view="grid" onclick="setView('grid')">
+                            <i class="ri-grid-fill"></i>
+                        </button>
+                        <button class="btn-icon-sm" data-view="list" onclick="setView('list')">
+                            <i class="ri-list-unordered"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="library-bar" id="libraryStats"></div>
+
+            <div class="library-grid" id="libraryContent"></div>
+
+            <div class="empty-state hidden" id="libraryEmpty">
+                <i class="ri-inbox-unarchive-line"></i>
+                <h3>Tu biblioteca está vacía</h3>
+                <p>Descarga tu primer video para comenzar</p>
+                <button class="btn btn-primary" onclick="switchPage('download')">
+                    <i class="ri-download-cloud-2-line"></i> Ir a Descargar
+                </button>
+            </div>
+        </section>
+
+        <!-- ═══ HISTORY PAGE ═══ -->
+        <section class="page" id="page-history">
+            <div class="page-header">
+                <div class="page-title">
+                    <i class="ri-time-line"></i>
+                    <h1>Historial</h1>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="clearHistory()">
+                    <i class="ri-delete-bin-7-line"></i> Limpiar
+                </button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+            <div class="empty-state hidden" id="historyEmpty">
+                <i class="ri-time-line"></i>
+                <h3>Sin historial</h3>
+                <p>Aún no has descargado ningún video</p>
+            </div>
+        </section>
+
+        <!-- ═══ PLAYER PAGE (YouTube-like) ═══ -->
+        <section class="page" id="page-player">
+            <div class="player-layout">
+                <div class="player-main">
+                    <div class="player-video-wrap">
+                        <video id="videoPlayer" controls playsinline></video>
+                    </div>
+                    <div class="player-details">
+                        <h2 id="playerTitle"></h2>
+                        <div class="player-meta">
+                            <span class="player-channel"><i class="ri-user-line"></i> <span id="playerChannel"></span></span>
+                            <span class="player-quality" id="playerQuality"></span>
+                        </div>
+                        <div class="player-actions">
+                            <button class="btn btn-ghost btn-sm" onclick="playerAction('prev')">
+                                <i class="ri-skip-back-line"></i> Anterior
+                            </button>
+                            <button class="btn btn-ghost btn-sm" onclick="playerAction('next')">
+                                Siguiente <i class="ri-skip-forward-line"></i>
+                            </button>
+                            <div class="toggle-row">
+                                <label class="toggle">
+                                    <input type="checkbox" id="autoplayToggle" checked>
+                                    <span class="toggle-track"></span>
+                                </label>
+                                <span>Autoplay</span>
+                            </div>
+                        </div>
+                        <p class="player-desc" id="playerDesc"></p>
+                    </div>
+                </div>
+                <div class="player-sidebar">
+                    <div class="player-sidebar-header">
+                        <i class="ri-play-list-2-fill"></i>
+                        <span>En cola</span>
+                    </div>
+                    <div class="player-queue" id="playerQueue"></div>
+                </div>
+            </div>
+            <button class="btn-back" onclick="closePlayer()">
+                <i class="ri-arrow-left-line"></i> Volver a Biblioteca
+            </button>
+        </section>
+    </main>
+
+    <!-- Create Folder Modal -->
+    <div class="modal hidden" id="folderModal">
+        <div class="modal-backdrop" onclick="closeFolderModal()"></div>
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="ri-folder-add-line"></i> Nueva Carpeta</h3>
+                <button class="btn-icon-sm" onclick="closeFolderModal()"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="field">
+                    <label>Nombre</label>
+                    <input type="text" id="folderName" placeholder="Nombre de la carpeta" class="input-modern">
+                </div>
+                <div class="field">
+                    <label>Carpeta padre</label>
+                    <select id="folderParent" class="select-modern"><option value="">Raíz</option></select>
+                </div>
+                <div class="field">
+                    <label>Color</label>
+                    <div class="color-row" id="colorPicker">
+                        <button class="color-dot active" data-color="#0891b2" style="--c:#0891b2"></button>
+                        <button class="color-dot" data-color="#6366f1" style="--c:#6366f1"></button>
+                        <button class="color-dot" data-color="#8b5cf6" style="--c:#8b5cf6"></button>
+                        <button class="color-dot" data-color="#ec4899" style="--c:#ec4899"></button>
+                        <button class="color-dot" data-color="#ef4444" style="--c:#ef4444"></button>
+                        <button class="color-dot" data-color="#f97316" style="--c:#f97316"></button>
+                        <button class="color-dot" data-color="#eab308" style="--c:#eab308"></button>
+                        <button class="color-dot" data-color="#22c55e" style="--c:#22c55e"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeFolderModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="createFolder()">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Modal -->
+    <div class="modal hidden" id="moveModal">
+        <div class="modal-backdrop" onclick="closeMoveModal()"></div>
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="ri-folder-transfer-line"></i> Mover a Carpeta</h3>
+                <button class="btn-icon-sm" onclick="closeMoveModal()"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body" id="moveFolderList"></div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="ctx-menu hidden" id="contextMenu">
+        <button onclick="ctxAction('play')"><i class="ri-play-circle-line"></i> Reproducir</button>
+        <button onclick="ctxAction('move')"><i class="ri-folder-transfer-line"></i> Mover a...</button>
+        <button id="ctxWatchBtn" onclick="ctxAction('toggleWatch')"><i class="ri-eye-line"></i> <span id="ctxWatchLabel">Marcar como visto</span></button>
+        <hr>
+        <button class="ctx-danger" onclick="ctxAction('delete')"><i class="ri-delete-bin-7-line"></i> Eliminar</button>
+    </div>
+
+    <!-- Toasts -->
+    <div class="toast-wrap" id="toastWrap"></div>
+
+    <!-- Bottom Nav (mobile) -->
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="#" class="bnav-item active" data-page="download" onclick="switchPage('download', event)">
+            <i class="ri-download-cloud-2-line"></i>
+            <span>Descargar</span>
+        </a>
+        <a href="#" class="bnav-item" data-page="library" onclick="switchPage('library', event)">
+            <i class="ri-film-line"></i>
+            <span>Biblioteca</span>
+        </a>
+        <a href="#" class="bnav-item" data-page="history" onclick="switchPage('history', event)">
+            <i class="ri-time-line"></i>
+            <span>Historial</span>
+        </a>
+    </nav>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>
