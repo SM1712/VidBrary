@@ -587,6 +587,25 @@ body{flex-direction:row}
 }
 .move-item:hover{border-color:var(--accent);background:var(--accent-sub)}
 
+/* ─── Phone Modal ─────────────────────────────────────── */
+.phone-modal-body{text-align:center}
+.phone-hint{font-size:13px;color:var(--tx-2);line-height:1.5;margin-bottom:16px}
+.phone-hint strong{color:var(--accent)}
+.qr-container{
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;padding:16px;
+    background:#fff;border-radius:12px;width:fit-content;
+}
+.qr-container img{display:block}
+.lan-url-box{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--bg-2);border:1px solid var(--border);
+    border-radius:10px;padding:10px 14px;font-size:14px;
+    font-family:'Inter',monospace;color:var(--accent);font-weight:600;
+}
+.lan-url-box .btn-icon-sm{color:var(--tx-2)}
+.lan-url-box .btn-icon-sm:hover{color:var(--accent)}
+
 /* ─── Context Menu ─────────────────────────────────────── */
 .ctx-menu{
     position:fixed;background:var(--bg-1);border:1px solid var(--border);

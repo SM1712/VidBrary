@@ -883,3 +883,43 @@ function fmtDate(d) {
 
 function show(id) { document.getElementById(id)?.classList.remove('hidden'); }
 function hide(id) { document.getElementById(id)?.classList.add('hidden'); }
+
+// ─── Phone QR Modal ──────────────────────────────────
+let lanUrl = '';
+
+function showPhoneModal(e) {
+    if (e) e.preventDefault();
+    show('phoneModal');
+    // Close sidebar on mobile
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.getElementById('sidebarOverlay')?.classList.remove('show');
+    // Fetch LAN info and generate QR
+    fetch('/api/lan-info')
+        .then(r => r.json())
+        .then(data => {
+            lanUrl = data.url;
+            document.getElementById('lanUrlText').textContent = lanUrl;
+            // Generate QR code
+            const qr = qrcode(0, 'M');
+            qr.addData(lanUrl);
+            qr.make();
+            const container = document.getElementById('qrContainer');
+            container.innerHTML = qr.createImgTag(5, 8);
+        })
+        .catch(() => {
+            document.getElementById('qrContainer').innerHTML = '<span style="color:var(--red)">No se pudo obtener la IP</span>';
+        });
+}
+
+function closePhoneModal() {
+    hide('phoneModal');
+}
+
+function copyLanUrl() {
+    if (!lanUrl) return;
+    navigator.clipboard.writeText(lanUrl).then(() => {
+        toast('Enlace copiado', 'ok');
+    }).catch(() => {
+        toast('No se pudo copiar', 'err');
+    });
+}

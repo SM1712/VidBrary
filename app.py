@@ -844,5 +844,18 @@ def get_stats():
     })
 
 
+@app.route("/api/lan-info")
+def lan_info():
+    import socket
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    port = request.host.split(':')[-1] if ':' in request.host else '5000'
+    return jsonify({"ip": ip, "port": port, "url": f"http://{ip}:{port}"})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

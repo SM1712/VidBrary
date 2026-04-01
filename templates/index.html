@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 </head>
 <body data-theme="dark">
 
@@ -58,6 +59,10 @@
             <a href="#" class="nav-item" data-page="history" onclick="switchPage('history', event)">
                 <i class="ri-time-line"></i>
                 <span>Historial</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPhoneModal(event)">
+                <i class="ri-smartphone-line"></i>
+                <span>Celular</span>
             </a>
         </nav>
 
@@ -370,6 +375,29 @@
                 <button class="btn-icon-sm" onclick="closeMoveModal()"><i class="ri-close-line"></i></button>
             </div>
             <div class="modal-body" id="moveFolderList"></div>
+        </div>
+    </div>
+
+    <!-- Phone QR Modal -->
+    <div class="modal hidden" id="phoneModal">
+        <div class="modal-backdrop" onclick="closePhoneModal()"></div>
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="ri-smartphone-line"></i> Conectar Celular</h3>
+                <button class="btn-icon-sm" onclick="closePhoneModal()"><i class="ri-close-line"></i></button>
+            </div>
+            <div class="modal-body phone-modal-body">
+                <p class="phone-hint">Escanea este código QR con tu celular para abrir Vidbrary. Ambos dispositivos deben estar en la <strong>misma red WiFi</strong>.</p>
+                <div class="qr-container" id="qrContainer">
+                    <div class="loader"><span></span><span></span><span></span></div>
+                </div>
+                <div class="lan-url-box" id="lanUrlBox">
+                    <span id="lanUrlText"></span>
+                    <button class="btn-icon-sm" onclick="copyLanUrl()" title="Copiar enlace">
+                        <i class="ri-file-copy-line"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
